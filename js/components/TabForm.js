@@ -2,8 +2,9 @@ function TabForm({ onSubmit, onCancel }) {
     try {
         const [customerName, setCustomerName] = React.useState('');
         const [error, setError] = React.useState('');
+        const [isSubmitting, setIsSubmitting] = React.useState(false);
         
-        const handleSubmit = (e) => {
+        const handleSubmit = async (e) => {
             e.preventDefault();
             
             if (!customerName.trim()) {
@@ -11,7 +12,18 @@ function TabForm({ onSubmit, onCancel }) {
                 return;
             }
             
-            onSubmit({ customerName });
+            // Evita múltiplos cliques
+            if (isSubmitting) return;
+            
+            setIsSubmitting(true);
+            
+            try {
+                await onSubmit({ customerName });
+            } catch (error) {
+                console.error('Erro ao criar comanda:', error);
+                setError('Ocorreu um erro ao criar a comanda. Tente novamente.');
+                setIsSubmitting(false);
+            }
         };
         
         return (
@@ -47,6 +59,7 @@ function TabForm({ onSubmit, onCancel }) {
                             type="button" 
                             className="btn btn-secondary" 
                             onClick={onCancel}
+                            disabled={isSubmitting}
                         >
                             Cancelar
                         </button>
@@ -54,8 +67,9 @@ function TabForm({ onSubmit, onCancel }) {
                             data-name="submit-button"
                             type="submit" 
                             className="btn btn-primary"
+                            disabled={isSubmitting}
                         >
-                            Criar Comanda
+                            {isSubmitting ? 'Criando...' : 'Criar Comanda'}
                         </button>
                     </div>
                 </form>

@@ -6,6 +6,7 @@ function TabsPage() {
         const [showPaymentForm, setShowPaymentForm] = React.useState(false);
         const [toasts, setToasts] = React.useState([]);
         const [autoOpenProductSelector, setAutoOpenProductSelector] = React.useState(false);
+        const [isCreatingTab, setIsCreatingTab] = React.useState(false);
         
         // Carrega as comandas e configura os listeners para atualizações em tempo real
         React.useEffect(() => {
@@ -41,12 +42,15 @@ function TabsPage() {
         };
         
         const handleCreateTab = () => {
+            // Evita que o usuário abra múltiplos formulários de nova comanda
+            if (isCreatingTab) return;
             setShowNewTabForm(true);
         };
         
         const handleNewTabSubmit = async (formData) => {
             try {
                 console.log('Criando nova comanda com dados:', formData);
+                setIsCreatingTab(true);
                 
                 const newTab = await TabManager.createTab(formData.customerName);
                 
@@ -72,6 +76,8 @@ function TabsPage() {
                         message: 'Erro ao criar comanda.',
                         type: 'error'
                     });
+                    // Propagar o erro para resetar o estado no TabForm
+                    throw new Error('Falha ao criar comanda');
                 }
             } catch (error) {
                 console.error('Erro ao criar comanda:', error);
@@ -79,11 +85,16 @@ function TabsPage() {
                     message: 'Erro ao criar comanda.',
                     type: 'error'
                 });
+                // Propagar o erro para resetar o estado no TabForm
+                throw error;
+            } finally {
+                setIsCreatingTab(false);
             }
         };
         
         const handleNewTabCancel = () => {
             setShowNewTabForm(false);
+            setIsCreatingTab(false);
         };
         
         const handleAddItem = async (tabId, item) => {
@@ -285,9 +296,10 @@ function TabsPage() {
                                 data-name="new-tab-button"
                                 className="btn btn-primary"
                                 onClick={handleCreateTab}
+                                disabled={isCreatingTab}
                             >
                                 <i className="fas fa-plus mr-2"></i>
-                                Nova Comanda
+                                {isCreatingTab ? 'Criando...' : 'Nova Comanda'}
                             </button>
                         </div>
                         
@@ -300,9 +312,10 @@ function TabsPage() {
                                 <button
                                     className="btn btn-primary mt-4"
                                     onClick={handleCreateTab}
+                                    disabled={isCreatingTab}
                                 >
                                     <i className="fas fa-plus mr-2"></i>
-                                    Criar Nova Comanda
+                                    {isCreatingTab ? 'Criando...' : 'Criar Nova Comanda'}
                                 </button>
                             </div>
                         ) : (
