@@ -13,8 +13,8 @@
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --notch-size: 5px;
-    --notch-distance: 14px;
+    --notch-size: 6px;
+    --notch-distance: 17px;
     clip-path: 
         polygon(
             /* Parte superior - efeito de rasgo mais suave */
