@@ -7,6 +7,19 @@ function TabsPage() {
         const [toasts, setToasts] = React.useState([]);
         const [autoOpenProductSelector, setAutoOpenProductSelector] = React.useState(false);
         const [isCreatingTab, setIsCreatingTab] = React.useState(false);
+        const [searchTerm, setSearchTerm] = React.useState('');
+        
+        // Filtrar comandas com base no termo de pesquisa
+        const filteredTabs = React.useMemo(() => {
+            if (!searchTerm) return tabs;
+            
+            const term = searchTerm.toLowerCase().trim();
+            return tabs.filter(tab => {
+                const matchesNumber = String(tab.number).includes(term);
+                const matchesName = tab.customerName.toLowerCase().includes(term);
+                return matchesNumber || matchesName;
+            });
+        }, [tabs, searchTerm]);
         
         // Carrega as comandas e configura os listeners para atualizações em tempo real
         React.useEffect(() => {
@@ -292,15 +305,55 @@ function TabsPage() {
                                 {tabs.length} comandas abertas
                             </div>
                             
-                            <button
-                                data-name="new-tab-button"
-                                className="btn btn-primary"
-                                onClick={handleCreateTab}
-                                disabled={isCreatingTab}
-                            >
-                                <i className="fas fa-plus mr-2"></i>
-                                {isCreatingTab ? 'Criando...' : 'Nova Comanda'}
-                            </button>
+                            {!searchTerm && (
+                                <button
+                                    data-name="new-tab-button"
+                                    className="btn btn-primary"
+                                    onClick={handleCreateTab}
+                                    disabled={isCreatingTab}
+                                >
+                                    <i className="fas fa-plus mr-2"></i>
+                                    {isCreatingTab ? 'Criando...' : 'Nova Comanda'}
+                                </button>
+                            )}
+                        </div>
+                        
+                        <div data-name="tabs-search" className="mb-4">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    className="form-control pl-10"
+                                    placeholder="Pesquisar por cliente ou número da comanda..."
+                                    value={searchTerm || ''}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <i className="fas fa-search text-gray-400"></i>
+                                </div>
+                                {searchTerm && (
+                                    <button
+                                        className="absolute inset-y-0 right-0 flex items-center pr-3"
+                                        onClick={() => setSearchTerm('')}
+                                        title="Limpar pesquisa"
+                                    >
+                                        <i className="fas fa-times text-gray-400 hover:text-gray-200"></i>
+                                    </button>
+                                )}
+                            </div>
+                            {searchTerm && filteredTabs.length === 0 && tabs.length > 0 && (
+                                <div className="mt-2 text-center p-2 bg-gray-800 rounded-md">
+                                    <p className="text-yellow-400 mb-1">
+                                        <i className="fas fa-exclamation-circle mr-2"></i>
+                                        Nenhuma comanda encontrada para "{searchTerm}"
+                                    </p>
+                                    <button
+                                        className="text-sm text-blue-400 hover:underline"
+                                        onClick={() => setSearchTerm('')}
+                                    >
+                                        Limpar pesquisa
+                                    </button>
+                                </div>
+                            )}
                         </div>
                         
                         {tabs.length === 0 ? (
@@ -320,10 +373,11 @@ function TabsPage() {
                             </div>
                         ) : (
                             <TabList
-                                tabs={tabs}
+                                tabs={filteredTabs}
                                 onSelectTab={handleSelectTab}
                                 onCreateTab={handleCreateTab}
                                 selectedTabId={selectedTabId}
+                                showCreateButton={!searchTerm}
                             />
                         )}
                     </React.Fragment>

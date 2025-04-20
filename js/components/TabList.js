@@ -1,4 +1,4 @@
-function TabList({ tabs, onSelectTab, onCreateTab, selectedTabId }) {
+function TabList({ tabs, onSelectTab, onCreateTab, selectedTabId, showCreateButton = true }) {
     try {
         const handleSelectTab = (tab) => {
             if (onSelectTab) {
@@ -23,9 +23,11 @@ function TabList({ tabs, onSelectTab, onCreateTab, selectedTabId }) {
                     />
                 ))}
                 
-                <div data-name="create-tab-card" onClick={handleCreateTab}>
-                    <TabCard />
-                </div>
+                {showCreateButton && (
+                    <div data-name="create-tab-card" onClick={handleCreateTab}>
+                        <TabCard />
+                    </div>
+                )}
             </div>
         );
     } catch (error) {
